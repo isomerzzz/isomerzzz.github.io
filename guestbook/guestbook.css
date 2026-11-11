@@ -1,0 +1,151 @@
+#guestbook > .window-body {
+  padding: clamp(0.7rem, 2vw, 1rem);
+}
+
+.guestbook {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.guestbook-intro,
+.guestbook-form label span,
+.guestbook-feedback,
+.guestbook-state,
+.guestbook-meta time {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.guestbook-form {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.guestbook-form label,
+.guestbook-feed h3 {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.guestbook-form label[for="guestbook-message"] {
+  margin-top: 0.15rem;
+}
+
+.guestbook-form input,
+.guestbook-form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  background: var(--inset);
+  color: var(--ink);
+  font: inherit;
+}
+
+.guestbook-form input::placeholder,
+.guestbook-form textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.guestbook-form input {
+  max-width: 16rem;
+}
+
+.guestbook-form textarea {
+  resize: vertical;
+}
+
+.guestbook-trap {
+  display: none;
+}
+
+.guestbook-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.85rem;
+  margin-top: 0.2rem;
+}
+
+.guestbook button {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  background: var(--inset);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.guestbook button[type="submit"] {
+  background: linear-gradient(var(--bar-top), var(--bar-bottom));
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.guestbook button:not(:disabled):hover {
+  border-color: var(--link);
+}
+
+.guestbook button:disabled {
+  opacity: 0.68;
+  cursor: default;
+}
+
+.guestbook-feedback[data-error] {
+  color: #ffb8ca;
+}
+
+.guestbook-feed {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--line);
+}
+
+.guestbook-retry {
+  justify-self: start;
+}
+
+.guestbook-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guestbook-list:empty {
+  display: none;
+}
+
+.guestbook-entry {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--line);
+  background: var(--inset);
+}
+
+.guestbook-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.15rem 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.guestbook-entry p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (pointer: coarse) {
+  .guestbook-form input,
+  .guestbook button {
+    min-height: 2.75rem;
+  }
+}
