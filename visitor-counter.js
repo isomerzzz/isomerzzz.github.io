@@ -37,12 +37,9 @@
     return data;
   }
 
-  function display({ total, historicalIncluded }) {
+  function display({ total }) {
     if (!widget) return;
     widget.querySelector('[data-visitor-total]').textContent = new Intl.NumberFormat('zh-CN').format(total);
-    if (historicalIncluded) {
-      widget.querySelector('[data-visitor-scope]').textContent = '含历史统计，启用后按浏览器去重。';
-    }
   }
 
   async function update() {
