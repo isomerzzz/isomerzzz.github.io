@@ -13,17 +13,31 @@ if (guestbook) {
   const comments = new Map();
 
   async function request(options) {
-    const response = await fetch(endpoint, {
-      credentials: 'omit',
-      cache: 'no-store',
-      signal: AbortSignal.timeout(12000),
-      ...options,
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || '留言服务暂时不可用，请稍后再试。');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(endpoint, {
+        credentials: 'omit',
+        cache: 'no-store',
+        signal: controller.signal,
+        ...options,
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || '留言服务暂时不可用，请稍后再试。');
+      }
+      return data;
+    } catch (error) {
+      if (controller.signal.aborted) {
+        throw new Error('连接留言服务超时，请稍后再试。');
+      }
+      if (error instanceof TypeError) {
+        throw new Error('无法连接留言服务，请检查网络后重试。');
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
     }
-    return data;
   }
 
   function renderComments() {
@@ -61,9 +75,11 @@ if (guestbook) {
       const data = await request();
       for (const comment of data.comments) comments.set(comment.id, comment);
       renderComments();
-    } catch {
+    } catch (error) {
       state.hidden = false;
-      state.textContent = '暂时无法读取留言。';
+      state.textContent = error.constructor === Error
+        ? error.message
+        : '暂时无法读取留言。';
       retry.hidden = false;
     }
   }
