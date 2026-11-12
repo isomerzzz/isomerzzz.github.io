@@ -1,6 +1,7 @@
-const guestbook = document.querySelector('[data-guestbook]');
+(() => {
+  const guestbook = document.querySelector('[data-guestbook]');
+  if (!guestbook) return;
 
-if (guestbook) {
   const endpoint = guestbook.dataset.api;
   const form = guestbook.querySelector('form');
   const message = form.elements.namedItem('message');
@@ -125,4 +126,4 @@ if (guestbook) {
   } else {
     state.textContent = '留言服务暂未开放。';
   }
-}
+})();
