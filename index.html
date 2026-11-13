@@ -593,10 +593,10 @@
     position: absolute;
     z-index: 1;
     inset-block-start: 0;
-    inset-inline: 0;
+    left: 50%;
     inline-size: max-content;
-    max-inline-size: 100%;
-    margin: 0 auto;
+    margin: 0;
+    transform: translateX(-50%);
     padding: 0.26rem 0.5rem;
     border: 1px solid #7b9fe8;
     border-radius: 0.3rem;
@@ -605,6 +605,7 @@
     font-size: 0.8125rem;
     line-height: 1.4;
     text-align: center;
+    white-space: nowrap;
     pointer-events: none;
   }
 
@@ -629,8 +630,12 @@
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const attackLine = '看我地刺攻击^^';
     const messages = ['！', '有点疼...', '...不要再点啦！！', attackLine, '^^'];
+    const pettingMessages = ['谢谢你......', '...好舒服！', '可以多摸摸我吗？><'];
     const clickWindow = 1200;
     const clicksToSpeak = 3;
+    const pettingWindow = 1000;
+    const pettingStrokeDistance = 18;
+    const pettingStrokeTime = 250;
     const messageDuration = 2600;
 
     for (const widget of document.querySelectorAll('[data-pet-interaction]')) {
@@ -644,6 +649,49 @@
       let bounce;
       let attack;
       let hideMessage;
+      let strokeStart;
+      let previousStroke;
+      let lastReversalAt = -Infinity;
+      let nextPettingAt = 0;
+
+      function showMessage(reply) {
+        bubble.textContent = reply;
+        clearTimeout(hideMessage);
+        hideMessage = setTimeout(() => { bubble.textContent = ''; }, messageDuration);
+      }
+
+      button.addEventListener('pointerdown', () => { strokeStart = undefined; });
+      button.addEventListener('pointermove', ({ pointerType, buttons, clientX, clientY, timeStamp }) => {
+        if (pointerType !== 'mouse' || buttons || timeStamp < nextPettingAt) return;
+
+        if (!strokeStart || timeStamp - strokeStart.time > pettingStrokeTime) {
+          strokeStart = { x: clientX, y: clientY, time: timeStamp };
+          previousStroke = undefined;
+          lastReversalAt = -Infinity;
+          return;
+        }
+
+        const dx = clientX - strokeStart.x;
+        const dy = clientY - strokeStart.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance < pettingStrokeDistance) return;
+
+        const stroke = { x: dx / distance, y: dy / distance };
+        // A dot product of -0.5 or less means the stroke turned by at least 120 degrees.
+        const reversed = previousStroke && stroke.x * previousStroke.x + stroke.y * previousStroke.y <= -0.5;
+        previousStroke = stroke;
+        strokeStart = { x: clientX, y: clientY, time: timeStamp };
+        if (!reversed) return;
+
+        if (timeStamp - lastReversalAt <= pettingWindow) {
+          const reply = pettingMessages[Math.floor(Math.random() * pettingMessages.length)];
+          showMessage(reply);
+          nextPettingAt = timeStamp + messageDuration;
+          strokeStart = undefined;
+        }
+        lastReversalAt = timeStamp;
+      });
+
       button.addEventListener('click', () => {
         const now = performance.now();
         while (recentClicks.length && recentClicks[0] < now - clickWindow) {
@@ -655,9 +703,7 @@
         if (recentClicks.length === clicksToSpeak) {
           recentClicks.length = 0;
           reply = messages[Math.floor(Math.random() * messages.length)];
-          bubble.textContent = reply;
-          clearTimeout(hideMessage);
-          hideMessage = setTimeout(() => { bubble.textContent = ''; }, messageDuration);
+          showMessage(reply);
           attack?.cancel();
           if (reply === attackLine) {
             attack = reduceMotion.matches
