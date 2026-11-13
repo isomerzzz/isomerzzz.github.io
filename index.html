@@ -105,7 +105,7 @@
   .sea-fish-sprite {
     inline-size: 2.5rem;
     block-size: 1.5rem;
-    scale: var(--fish-facing, -1) 1;
+    scale: calc(var(--fish-facing, -1) * var(--fish-size, 1)) var(--fish-size, 1);
     filter: drop-shadow(0 2px 0 #020914) drop-shadow(0 0 4px #5f91da80);
     pointer-events: none;
   }
@@ -152,16 +152,14 @@
 
   .sea-fish-swimmer[data-big] {
     z-index: 1;
-    inline-size: 4.15rem;
-    block-size: 2.5rem;
     filter: drop-shadow(0 2px 0 #020914) drop-shadow(0 0 6px #7aaaff);
   }
 
   .sea-fish-swimmer[data-leader]::after {
     position: absolute;
-    inset: -0.5rem auto auto 50%;
-    inline-size: 1.15rem;
-    block-size: 0.6rem;
+    inset: -0.3rem auto auto 50%;
+    inline-size: 0.7rem;
+    block-size: 0.36rem;
     translate: -50% 0;
     background: linear-gradient(#f1f7ff 48%, #8cb6ff 49%);
     clip-path: polygon(0 0, 25% 32%, 50% 0, 75% 32%, 100% 0, 84% 100%, 16% 100%);
@@ -266,7 +264,10 @@
     const school = [];
     const firstBigFishChance = 0.12;
     const anotherBigFishChance = 0.04;
-    const bubbleLimit = 100;
+    const bigFishScale = 1.66;
+    const maxGrowthWins = 4;
+    const maxExtraArea = 0.5;
+    const bubbleLimit = 65;
     const idleBeforeDuel = 1600;
     const duelDuration = 1050;
     const duelCooldown = 5600;
@@ -306,17 +307,17 @@
 
     function blowBubbles(fish, amount) {
       const available = bubbleLimit - (water.childElementCount - school.length);
-      const mouthX = fish.x + fish.facing * (fish.big ? 31 : 19);
+      const mouthX = fish.x + fish.facing * (fish.width * fish.size / 2 - 1);
       for (let index = 0; index < Math.min(amount, available); index++) {
         const bubble = document.createElement('span');
         const size = 7 + Math.round(Math.random() * 7);
-        const x = mouthX + fish.facing * (index * 6);
-        const y = fish.y + 3 - index * 5;
+        const x = mouthX + fish.facing * (index * 14);
+        const y = fish.y + 3 * fish.size - index * 12;
         bubble.className = 'sea-fish-bubble';
         bubble.style.inlineSize = `${size}px`;
         bubble.style.blockSize = `${size}px`;
         water.append(bubble);
-        const drift = fish.facing * (8 + index * 9);
+        const drift = fish.facing * (14 + index * 16);
         const animation = bubble.animate([
           { translate: `${x}px ${y}px`, opacity: 0.95 },
           { translate: `${x + drift * 0.65}px ${y - 27}px`, opacity: 0.9, offset: 0.55 },
@@ -333,6 +334,14 @@
       fish.sprite.dataset.leader = '';
     }
 
+    function setSize(fish) {
+      const growthSteps = Math.max(0, Math.min(fish.wins, maxGrowthWins) - 1);
+      const extraArea = maxExtraArea * growthSteps / (maxGrowthWins - 1);
+      fish.size = fish.big ? bigFishScale * Math.sqrt(1 + extraArea) : 1;
+      fish.sprite.style.setProperty('--fish-size', fish.size);
+      fish.sprite.toggleAttribute('data-big', fish.big);
+    }
+
     function endDuel() {
       if (!duel) return;
       duel.leader.sprite.removeAttribute('data-dueling');
@@ -344,14 +353,23 @@
       if (duel) {
         const age = (now - duel.started) / duelDuration;
         if (age >= 1) {
-          if (Math.random() < 0.5) setLeader(duel.challenger);
+          const challengerWon = Math.random() < 0.5;
+          const winner = challengerWon ? duel.challenger : duel.leader;
+          const loser = challengerWon ? duel.leader : duel.challenger;
+          if (challengerWon) setLeader(winner);
+          winner.wins++;
+          loser.wins = 0;
+          loser.big = false;
+          bigFishCount--;
+          setSize(winner);
+          setSize(loser);
           endDuel();
           nextDuelAt = now + duelCooldown;
         } else if (age >= 0.39 && !duel.clashed) {
           duel.clashed = true;
           for (const fish of [duel.leader, duel.challenger]) {
             fish.bitingUntil = now + 210;
-            blowBubbles(fish, 4);
+            blowBubbles(fish, 2);
           }
         }
         return;
@@ -369,8 +387,8 @@
     }
 
     function moveFish(fish, x, y, progress, facing) {
-      const marginX = fish.width / 2 + 3;
-      const marginY = fish.height / 2 + (fish.big ? 10 : 3);
+      const marginX = fish.width * fish.size / 2 + 3;
+      const marginY = (fish.height / 2 + (fish.big ? 5 : 3)) * fish.size;
       const nextX = Math.max(marginX, Math.min(innerWidth - marginX, x));
       const nextY = Math.max(marginY, Math.min(innerHeight - marginY, y));
       const dx = nextX - fish.x;
@@ -389,7 +407,7 @@
       const target = trailBubble?.expires > now ? trailBubble : destination;
       const side = target.x < 90 ? 1 : target.x > innerWidth - 90 ? -1 : -heading;
       formationSide += (side - formationSide) * progress;
-      const headWidth = first.width / 2;
+      const headWidth = first.width * first.size / 2;
       const rows = Math.ceil((school.length - 1) / 3);
       const room = (side > 0 ? innerWidth - target.x : target.x) - headWidth - 31;
       const spacing = Math.max(13, Math.min(47, room / Math.max(1, rows)));
@@ -405,7 +423,8 @@
           const age = (now - duel.started) / duelDuration;
           const lunge = Math.sin(Math.PI * Math.min(1, age / 0.8));
           const flank = fish === duel.leader ? duel.side : -duel.side;
-          moveFish(fish, duel.x + flank * (69 - 44 * lunge), duel.y + flank * (14 - 9 * lunge), progress, -flank);
+          const duelWidth = (duel.leader.width * duel.leader.size + duel.challenger.width * duel.challenger.size) / 4;
+          moveFish(fish, duel.x + flank * (duelWidth + 36 - 44 * lunge), duel.y + flank * (14 - 9 * lunge), progress, -flank);
         } else {
           const follow = progress === 1 ? 1 : progress / (1 + Math.min(row, 5) * 0.18);
           moveFish(fish, x, y, follow);
@@ -422,8 +441,8 @@
       for (const fish of school) {
         fish.sprite.toggleAttribute('data-biting', now < fish.bitingUntil);
         if (now < fish.nextBubble) continue;
-        blowBubbles(fish, fish === first ? 4 : 3);
-        fish.nextBubble = now + Math.max(540, school.length * 115) + Math.random() * 260;
+        blowBubbles(fish, 2);
+        fish.nextBubble = now + Math.max(820, school.length * 145) + Math.random() * 360;
       }
     }
 
@@ -456,13 +475,16 @@
       swimmer.classList.add('sea-fish-swimmer');
       const now = performance.now();
       const big = Math.random() < (bigFishCount ? anotherBigFishChance : firstBigFishChance);
-      const fish = { sprite: swimmer, x, y, big, facing: -1, phase: school.length * 0.9, nextBubble: now + 180, bitingUntil: 0 };
+      const fish = {
+        sprite: swimmer, x, y, big, wins: 0, facing: -1, phase: school.length * 0.9,
+        nextBubble: now + 180 + (school.length % 6) * 90, bitingUntil: 0,
+      };
       school.push(fish);
       if (big) {
-        swimmer.dataset.big = '';
         if (!bigFishCount) setLeader(fish);
         bigFishCount++;
       }
+      setSize(fish);
 
       water.append(swimmer);
       fish.width = swimmer.offsetWidth;
