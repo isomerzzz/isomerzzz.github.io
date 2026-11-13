@@ -1,0 +1,1 @@
+import{r as e}from"./fish-visit.CoqEv1QV.js";e(),document.addEventListener(`astro:before-swap`,e=>{let t=document.documentElement.dataset.theme;t&&(e.newDocument.documentElement.dataset.theme=t),e.viewTransition.ready.catch(()=>{}),e.viewTransition.skipTransition()});
