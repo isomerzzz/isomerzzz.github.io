@@ -70,48 +70,111 @@
   .home-page #visitors {
     grid-area: visitors;
   }
-}</style></head><body id="top" class="home-page"><div class="deep-sea" aria-hidden="true" data-astro-cid-jpfj4ula><span class="deep-sea-light" data-astro-cid-jpfj4ula></span><span class="deep-sea-shadow" data-astro-cid-jpfj4ula></span><span class="deep-sea-sediment" data-astro-cid-jpfj4ula></span><span class="deep-sea-sediment deep-sea-sediment-near" data-astro-cid-jpfj4ula></span></div><a class="skip-link" href="#main-content">跳到主要内容</a><header class="shell site-header has-sea-fish"><a class="banner" href="/"><img src="/images/blue-hour-banner.webp" alt="" width="1440" height="480" fetchpriority="high"><img class="banner-tide" src="/images/blue-hour-banner.webp" alt="" width="1440" height="480" aria-hidden="true"><span class="banner-title">^^</span></a><button class="sea-fish" type="button" aria-label="让小鱼追泡泡" aria-pressed="false" data-sea-fish><span class="sea-fish-sprite" aria-hidden="true"><span class="sea-fish-tail"></span><span class="sea-fish-body"></span><span class="sea-fish-eye"></span><span class="sea-fish-mouth"></span></span></button><style data-sea-fish-style>
+}</style></head><body id="top" class="home-page"><div class="deep-sea" aria-hidden="true" data-astro-cid-jpfj4ula><span class="deep-sea-light" data-astro-cid-jpfj4ula></span><span class="deep-sea-shadow" data-astro-cid-jpfj4ula></span><span class="deep-sea-sediment" data-astro-cid-jpfj4ula></span><span class="deep-sea-sediment deep-sea-sediment-near" data-astro-cid-jpfj4ula></span></div><a class="skip-link" href="#main-content">跳到主要内容</a><header class="shell site-header has-sea-fish"><a class="banner" href="/"><img src="/images/blue-hour-banner.webp" alt="" width="1440" height="480" fetchpriority="high"><img class="banner-tide" src="/images/blue-hour-banner.webp" alt="" width="1440" height="480" aria-hidden="true"><span class="banner-title">^^</span></a><button class="sea-fish" type="button" data-sea-fish><span class="sea-fish-sprite" aria-hidden="true"><span class="sea-fish-tail"></span><span class="sea-fish-body"></span><span class="sea-fish-eye"></span><span class="sea-fish-mouth"></span></span><span>召唤小鱼</span><span class="sea-fish-count" aria-hidden="true" hidden></span></button><div class="sea-fish-water" aria-hidden="true" data-sea-fish-water></div><style data-sea-fish-style>
   .has-sea-fish {
     position: relative;
   }
 
   .sea-fish {
     position: absolute;
-    z-index: 2;
-    inset-inline-end: clamp(1rem, 9%, 6rem);
-    inset-block-end: clamp(0.6rem, 13%, 2rem);
-    inline-size: 3rem;
-    block-size: 3rem;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--link);
+    z-index: 5;
+    inset-inline-end: clamp(0.9rem, 4%, 2.75rem);
+    inset-block-end: clamp(0.8rem, 12%, 2rem);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-block-size: 2.9rem;
+    padding: 0.28rem 0.65rem 0.28rem 0.4rem;
+    border: 1px solid var(--edge);
+    background: linear-gradient(180deg, var(--bar-top), var(--bar-bottom));
+    box-shadow: 3px 3px 0 var(--shadow), inset 0 1px 0 #92b8ff3b;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
     cursor: pointer;
     touch-action: manipulation;
   }
 
   .sea-fish-sprite {
-    position: absolute;
-    inset: 50% auto auto 50%;
     inline-size: 2.5rem;
     block-size: 1.5rem;
-    translate: -50% -50%;
     scale: var(--fish-facing, -1) 1;
     filter: drop-shadow(0 2px 0 #020914) drop-shadow(0 0 4px #5f91da80);
     pointer-events: none;
+  }
+
+  .sea-fish > .sea-fish-sprite {
+    position: relative;
+    flex: none;
+    inline-size: 2.75rem;
+    block-size: 1.65rem;
+  }
+
+  .sea-fish-count {
+    position: absolute;
+    inset: -0.5rem -0.35rem auto auto;
+    min-inline-size: 1.35rem;
+    padding: 0.13rem 0.26rem;
+    border: 1px solid var(--edge);
+    background: var(--inset);
+    color: var(--link);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  .sea-fish:is(:hover, :focus-visible) {
+    border-color: var(--link);
   }
 
   .sea-fish:is(:hover, :focus-visible) .sea-fish-sprite {
     filter: drop-shadow(0 2px 0 #020914) drop-shadow(0 0 5px var(--link));
   }
 
-  .sea-fish[data-swimming] {
+  .sea-fish-water {
+    position: fixed;
     z-index: 4;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
   }
 
-  .sea-fish[data-swimming] .sea-fish-sprite {
-    position: fixed;
-    inset: var(--fish-y) auto auto var(--fish-x);
+  .sea-fish-swimmer {
+    position: absolute;
+    inset: 0 auto auto 0;
+  }
+
+  .sea-fish-swimmer[data-leader] {
+    z-index: 1;
+    inline-size: 4.15rem;
+    block-size: 2.5rem;
+    filter: drop-shadow(0 2px 0 #020914) drop-shadow(0 0 6px #7aaaff);
+  }
+
+  .sea-fish-swimmer[data-leader]::after {
+    position: absolute;
+    inset: -0.5rem auto auto 50%;
+    inline-size: 1.15rem;
+    block-size: 0.6rem;
+    translate: -50% 0;
+    background: linear-gradient(#f1f7ff 48%, #8cb6ff 49%);
+    clip-path: polygon(0 0, 25% 32%, 50% 0, 75% 32%, 100% 0, 84% 100%, 16% 100%);
+    content: '';
+  }
+
+  .sea-fish-swimmer[data-leader] .sea-fish-body {
+    background: linear-gradient(#d9e8ff 0 24%, #88b3ff 24% 60%, #386bc9 60% 82%, #14357a 82%);
+  }
+
+  .sea-fish-bubble {
+    position: absolute;
+    inset: 0 auto auto 0;
+    border: 1px solid #b1d4ff;
+    border-radius: 30%;
+    background: radial-gradient(circle at 32% 27%, #eef7ff 0 13%, #80b9ff 15% 23%, #457edcc2 32%, #173b8290 72%);
+    box-shadow: 0 0 4px #82b6ff, inset -1px -1px #4271c7;
   }
 
   .sea-fish-tail {
@@ -124,8 +187,19 @@
     transform-origin: right center;
   }
 
-  .sea-fish[data-swimming] .sea-fish-tail {
-    animation: sea-fish-kick 280ms steps(2, end) infinite alternate;
+  @media (prefers-reduced-motion: no-preference) {
+    .sea-fish > .sea-fish-sprite {
+      animation: sea-fish-float 2.8s ease-in-out infinite alternate;
+    }
+
+    .sea-fish-swimmer .sea-fish-tail {
+      animation: sea-fish-kick 260ms steps(2, end) infinite alternate;
+    }
+  }
+
+  @keyframes sea-fish-float {
+    from { translate: 0 -3px; }
+    to { translate: 0 3px; }
   }
 
   @keyframes sea-fish-kick {
@@ -156,116 +230,179 @@
     background: #193771;
   }
 
-  .sea-fish[data-biting] .sea-fish-mouth {
+  .sea-fish-swimmer[data-biting] .sea-fish-mouth {
     block-size: 6px;
     background: #0a1837;
-    box-shadow: 3px -4px 0 -1px #92b8ff, 7px -7px 0 -1px #5f91da;
   }
 </style><script data-astro-rerun data-sea-fish-script>
   (() => {
-    const fish = document.querySelector('[data-sea-fish]');
-    if (!fish) return;
+    const summon = document.querySelector('[data-sea-fish]');
+    const water = document.querySelector('[data-sea-fish-water]');
+    if (!summon || !water) return;
 
+    const sprite = summon.querySelector('.sea-fish-sprite');
+    const count = summon.querySelector('.sea-fish-count');
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
     const lifecycle = new AbortController();
     const { signal } = lifecycle;
-    let position;
+    const school = [];
+    const leaderChance = 0.12;
+    const bubbleLimit = 100;
     let destination;
-    let bubble;
+    let trailBubble;
     let frame = 0;
-    let biteTimer;
-    let endTime;
     let lastFrame;
 
-    function bite() {
-      fish.dataset.biting = '';
-      clearTimeout(biteTimer);
-      biteTimer = setTimeout(() => { delete fish.dataset.biting; }, 170);
+    function showCount() {
+      count.hidden = school.length === 0;
+      count.textContent = school.length;
+      summon.setAttribute('aria-label', `召唤小鱼，当前 ${school.length} 条`);
     }
 
-    function place() {
-      fish.style.setProperty('--fish-x', `${Math.round(position.x)}px`);
-      fish.style.setProperty('--fish-y', `${Math.round(position.y)}px`);
-    }
-
-    function stop() {
+    function clearSchool() {
       cancelAnimationFrame(frame);
       frame = 0;
-      bubble = undefined;
-      delete fish.dataset.swimming;
-      fish.setAttribute('aria-pressed', 'false');
-      fish.style.removeProperty('--fish-facing');
+      destination = undefined;
+      trailBubble = undefined;
+      school.length = 0;
+      water.replaceChildren();
+      showCount();
+    }
+
+    function blowBubbles(fish, amount) {
+      const available = bubbleLimit - (water.childElementCount - school.length);
+      const mouthX = fish.x + fish.facing * (fish.sprite.hasAttribute('data-leader') ? 31 : 19);
+      for (let index = 0; index < Math.min(amount, available); index++) {
+        const bubble = document.createElement('span');
+        const size = 7 + Math.round(Math.random() * 7);
+        const x = mouthX + fish.facing * (index * 6);
+        const y = fish.y + 3 - index * 5;
+        bubble.className = 'sea-fish-bubble';
+        bubble.style.inlineSize = `${size}px`;
+        bubble.style.blockSize = `${size}px`;
+        water.append(bubble);
+        const drift = fish.facing * (8 + index * 9);
+        const animation = bubble.animate([
+          { translate: `${x}px ${y}px`, opacity: 0.95 },
+          { translate: `${x + drift * 0.65}px ${y - 27}px`, opacity: 0.9, offset: 0.55 },
+          { translate: `${x + drift}px ${y - 59 - index * 7}px`, opacity: 0 },
+        ], { duration: 940 + index * 120, easing: 'ease-out' });
+        animation.onfinish = () => bubble.remove();
+      }
+    }
+
+    function positionSchool(now, progress) {
+      const first = school[0];
+      const target = trailBubble?.expires > now ? trailBubble : destination;
+      const ahead = target.x - first.x;
+      if (Math.abs(ahead) > 35) first.facing = Math.sign(ahead);
+      const side = target.x < 90 ? 1 : target.x > innerWidth - 90 ? -1 : -first.facing;
+      const headWidth = first.sprite.hasAttribute('data-leader') ? 33 : 20;
+      const rows = Math.ceil((school.length - 1) / 3);
+      const room = (side > 0 ? innerWidth - target.x : target.x) - headWidth - 31;
+      const spacing = Math.max(13, Math.min(47, room / Math.max(1, rows)));
+      const middle = Math.max(49, Math.min(innerHeight - 49, target.y + 14));
+
+      for (const [index, fish] of school.entries()) {
+        const row = Math.ceil(index / 3);
+        const lane = index ? ((index - 1) % 3 - 1) : 0;
+        const margin = index ? 23 : headWidth + 2;
+        const x = target.x + side * (headWidth + row * spacing + Math.abs(lane) * 8);
+        const y = (index ? middle : target.y + 14) + lane * 26 + (progress === 1 ? 0 : Math.sin(now / 250 + fish.phase) * 4);
+        fish.x += (Math.max(margin, Math.min(innerWidth - margin, x)) - fish.x) * progress;
+        fish.y += (Math.max(25, Math.min(innerHeight - 25, y)) - fish.y) * progress;
+        fish.facing = first.facing;
+        fish.sprite.style.translate = `${Math.round(fish.x - fish.width / 2)}px ${Math.round(fish.y - fish.height / 2)}px`;
+        fish.sprite.style.setProperty('--fish-facing', fish.facing);
+      }
+
+      if (progress === 1) return;
+      if (target === trailBubble && Math.hypot(target.x - (first.x + first.facing * headWidth), target.y - first.y) < 24) {
+        trailBubble = undefined;
+        first.bitingUntil = now + 210;
+        first.nextBubble = Math.min(first.nextBubble, now);
+      }
+
+      for (const fish of school) {
+        fish.sprite.toggleAttribute('data-biting', now < fish.bitingUntil);
+        if (now < fish.nextBubble) continue;
+        blowBubbles(fish, fish === first ? 4 : 3);
+        fish.nextBubble = now + Math.max(540, school.length * 115) + Math.random() * 260;
+      }
     }
 
     function swim(now) {
-      if (now >= endTime || reduceMotion.matches) {
-        stop();
-        return;
-      }
-
-      const target = bubble && bubble.expires > now ? bubble : destination;
-      const x = Math.max(24, Math.min(innerWidth - 24, target.x));
-      const y = Math.max(17, Math.min(innerHeight - 17, target.y));
-      const dx = x - position.x;
-      const dy = y - position.y;
-      const progress = 1 - Math.exp(-Math.min(now - lastFrame, 50) / 125);
+      const progress = 1 - Math.exp(-Math.min(Math.max(now - lastFrame, 0), 64) / 145);
       lastFrame = now;
-      if (Math.abs(dx) > 2) fish.style.setProperty('--fish-facing', dx < 0 ? -1 : 1);
-      position.x += dx * progress;
-      position.y += dy * progress;
-      place();
-
-      if (target === bubble && Math.hypot(dx, dy) < 22 && !fish.hasAttribute('data-biting')) {
-        bite();
-        bubble = undefined;
-      }
+      positionSchool(now, progress);
       frame = requestAnimationFrame(swim);
     }
 
-    fish.addEventListener('click', () => {
-      if (frame) {
-        stop();
-        return;
-      }
+    function resume() {
       if (reduceMotion.matches) {
-        bite();
-        return;
+        cancelAnimationFrame(frame);
+        frame = 0;
+        for (const bubble of water.querySelectorAll('.sea-fish-bubble')) bubble.remove();
+        if (school.length) positionSchool(performance.now(), 1);
+      } else if (school.length && !frame) {
+        lastFrame = performance.now();
+        frame = requestAnimationFrame(swim);
+      }
+    }
+
+    summon.addEventListener('click', () => {
+      const box = sprite.getBoundingClientRect();
+      const x = box.left + box.width / 2;
+      const y = box.top + box.height / 2;
+      const swimmer = sprite.cloneNode(true);
+      swimmer.classList.add('sea-fish-swimmer');
+      const fish = { sprite: swimmer, x, y, facing: -1, phase: school.length * 0.9, nextBubble: performance.now() + 180, bitingUntil: 0 };
+
+      if (Math.random() < leaderChance) {
+        const previousLeader = school[0];
+        if (previousLeader?.sprite.hasAttribute('data-leader')) {
+          previousLeader.sprite.removeAttribute('data-leader');
+          previousLeader.width = previousLeader.sprite.offsetWidth;
+          previousLeader.height = previousLeader.sprite.offsetHeight;
+        }
+        swimmer.dataset.leader = '';
+        school.unshift(fish);
+      } else {
+        school.push(fish);
       }
 
-      const box = fish.getBoundingClientRect();
-      position = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
-      destination = { x: position.x - 64, y: position.y - 16 };
-      place();
-      fish.dataset.swimming = '';
-      fish.setAttribute('aria-pressed', 'true');
-      lastFrame = performance.now();
-      endTime = lastFrame + 6000;
-      frame = requestAnimationFrame(swim);
+      water.append(swimmer);
+      fish.width = swimmer.offsetWidth;
+      fish.height = swimmer.offsetHeight;
+      swimmer.style.translate = `${Math.round(x - fish.width / 2)}px ${Math.round(y - fish.height / 2)}px`;
+      destination ??= { x: x - 82, y: y - 35 };
+      showCount();
+      resume();
     }, { signal });
 
     function aim(event) {
       destination = { x: event.clientX, y: event.clientY };
+      if (reduceMotion.matches) positionSchool(performance.now(), 1);
     }
 
     window.addEventListener('pointermove', (event) => {
-      if (frame && event.pointerType === 'mouse') aim(event);
+      if (school.length && event.pointerType === 'mouse') aim(event);
     }, { passive: true, signal });
     window.addEventListener('pointerup', (event) => {
-      if (frame && event.pointerType !== 'mouse' && !fish.contains(event.target)) {
+      if (school.length && event.pointerType !== 'mouse' && !summon.contains(event.target)) {
         aim(event);
-        bubble = { ...destination, expires: performance.now() + 900 };
       }
     }, { passive: true, signal });
     document.addEventListener('pixel-cursor:bubble', (event) => {
-      if (frame) bubble = event.detail;
+      if (frame && (!trailBubble || trailBubble.expires <= performance.now())) trailBubble = event.detail;
     }, { signal });
 
+    reduceMotion.addEventListener('change', resume, { signal });
     window.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && frame) stop();
+      if (event.key === 'Escape' && school.length) clearSchool();
     }, { signal });
     document.addEventListener('astro:before-swap', () => {
-      stop();
-      clearTimeout(biteTimer);
+      clearSchool();
       lifecycle.abort();
     }, { once: true, signal });
   })();
