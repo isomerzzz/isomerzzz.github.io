@@ -503,7 +503,7 @@
     border: 0;
     background: transparent;
     cursor: pointer;
-    touch-action: manipulation;
+    touch-action: pan-y pinch-zoom;
   }
 
   .pet-image:focus-visible {
@@ -592,6 +592,8 @@
     const pettingWindow = 1000;
     const pettingStrokeDistance = 18;
     const pettingStrokeTime = 250;
+    const touchStrokeDistance = 14;
+    const touchStrokeTime = 350;
     const messageDuration = 2600;
 
     for (const widget of document.querySelectorAll('[data-pet-interaction]')) {
@@ -609,6 +611,8 @@
       let previousStroke;
       let lastReversalAt = -Infinity;
       let nextPettingAt = 0;
+      let activeTouch;
+      let suppressTouchClick = false;
 
       function showMessage(reply) {
         bubble.textContent = reply;
@@ -616,11 +620,42 @@
         hideMessage = setTimeout(() => { bubble.textContent = ''; }, messageDuration);
       }
 
-      button.addEventListener('pointerdown', () => { strokeStart = undefined; });
-      button.addEventListener('pointermove', ({ pointerType, buttons, clientX, clientY, timeStamp }) => {
-        if (pointerType !== 'mouse' || buttons || timeStamp < nextPettingAt) return;
+      button.addEventListener('pointerdown', ({ pointerType, pointerId, isPrimary, clientX, clientY, timeStamp }) => {
+        if (pointerType === 'touch') {
+          if (!isPrimary) return;
+          activeTouch = { id: pointerId, x: clientX, y: clientY };
+          suppressTouchClick = false;
+          strokeStart = { x: clientX, y: clientY, time: timeStamp };
+          previousStroke = undefined;
+          lastReversalAt = -Infinity;
+        } else if (pointerType === 'mouse' && !activeTouch) {
+          strokeStart = undefined;
+          suppressTouchClick = false;
+        }
+      });
 
-        if (!strokeStart || timeStamp - strokeStart.time > pettingStrokeTime) {
+      function endTouch({ pointerId }) {
+        if (pointerId !== activeTouch?.id) return;
+        activeTouch = undefined;
+        strokeStart = undefined;
+      }
+
+      button.addEventListener('pointerup', endTouch);
+      button.addEventListener('pointercancel', endTouch);
+      button.addEventListener('lostpointercapture', endTouch);
+      button.addEventListener('pointermove', ({ pointerType, pointerId, buttons, clientX, clientY, timeStamp }) => {
+        const touching = pointerType === 'touch' && activeTouch?.id === pointerId;
+        if (touching) {
+          if (Math.hypot(clientX - activeTouch.x, clientY - activeTouch.y) >= touchStrokeDistance) {
+            suppressTouchClick = true;
+          }
+        } else if (pointerType !== 'mouse' || buttons || activeTouch) {
+          return;
+        }
+        if (timeStamp < nextPettingAt) return;
+
+        const strokeTime = touching ? touchStrokeTime : pettingStrokeTime;
+        if (!strokeStart || timeStamp - strokeStart.time > strokeTime) {
           strokeStart = { x: clientX, y: clientY, time: timeStamp };
           previousStroke = undefined;
           lastReversalAt = -Infinity;
@@ -628,9 +663,10 @@
         }
 
         const dx = clientX - strokeStart.x;
-        const dy = clientY - strokeStart.y;
+        // Horizontal rubbing leaves vertical gestures available for native page scrolling.
+        const dy = touching ? 0 : clientY - strokeStart.y;
         const distance = Math.hypot(dx, dy);
-        if (distance < pettingStrokeDistance) return;
+        if (distance < (touching ? touchStrokeDistance : pettingStrokeDistance)) return;
 
         const stroke = { x: dx / distance, y: dy / distance };
         // A dot product of -0.5 or less means the stroke turned by at least 120 degrees.
@@ -642,13 +678,15 @@
         if (timeStamp - lastReversalAt <= pettingWindow) {
           const reply = pettingMessages[Math.floor(Math.random() * pettingMessages.length)];
           showMessage(reply);
+          if (touching) suppressTouchClick = true;
           nextPettingAt = timeStamp + messageDuration;
           strokeStart = undefined;
         }
         lastReversalAt = timeStamp;
       });
 
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (event) => {
+        if (suppressTouchClick && event.detail > 0) return;
         const now = performance.now();
         while (recentClicks.length && recentClicks[0] < now - clickWindow) {
           recentClicks.shift();
